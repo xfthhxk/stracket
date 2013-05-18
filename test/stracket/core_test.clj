@@ -1,0 +1,7 @@
+(ns stracket.core-test
+  (:use clojure.test
+        stracket.core))
+
+(deftest a-test
+  (testing "FIXME, I fail."
+    (is (= 0 1))))
