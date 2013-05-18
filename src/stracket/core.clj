@@ -2,11 +2,16 @@
   (:import [JaCoP.core Store IntVar])
   (:require [stracket.constraint :as sc]))
 
+(defn store
+  "makes a new Store instance"
+  []
+  (Store.))
 
-(defn impose
-  "Imposes a constraint on to the store"
-  [store constraint]
-  (.impose store constraint))
+(defn impose!
+  "Imposes constraints on to the store. The store is mutated."
+  [store constraints]
+  (doseq [c constraints]  ; doseq to realize potentially lazy constraints
+    (.impose store c)))
 
 (defn int-var
   "Creates a new IntVar instance"
