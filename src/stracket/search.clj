@@ -1,8 +1,10 @@
 (ns stracket.search
   (:import [JaCoP.search
+            MostConstrainedStatic
             Search DepthFirstSearch
             SelectChoicePoint InputOrderSelect
-            IndomainMin]))
+            IndomainMin
+            SimpleSelect]))
 
 (defn min-domain
   "Creates an instance of IndomainMin"
@@ -26,3 +28,19 @@
   (.labeling search store select))
 
   
+(defn search-all-at-once
+  "Returns the solution listener"
+  [store all-vars]
+  (let [select (SimpleSelect. (into-array all-vars) (MostConstrainedStatic.) (IndomainMin.))
+        search (depth-first-search)
+        solution-listener (.getSolutionListener search)]
+    (doto solution-listener
+      (.searchAll true)
+      (.recordSolutions true))
+    (.setAssignSolution search true)
+    (labeling search store select)
+    solution-listener))
+      
+    
+        
+        
