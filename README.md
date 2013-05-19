@@ -1,13 +1,13 @@
 # stracket
 
-A Clojure library designed to ... well, that part is up to you.
+A Clojure library designed to make using JaCoP easier.
 
-## Usage
+JaCoP is a constraint programming solver. 
+See http://jacop.osolpro.com/ for more info.
 
-FIXME
 
 ## License
 
-Copyright © 2013 FIXME
+Copyright © 2013 Amar Mehta
 
 Distributed under the Eclipse Public License, the same as Clojure.
