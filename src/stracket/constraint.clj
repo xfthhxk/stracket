@@ -41,10 +41,10 @@
   [xs ys n]
   (AmongVar. (into-array xs) (into-array ys) n))
 
-;; (defn and
-;;   "And among all the constraints"
-;;   [constraints]
-;;   (And. (into-array constraints)))
+(defn andc
+  "And among all the constraints"
+  [constraints]
+  (And. (into-array constraints)))
 
 (defn and-bool
   [vars result]
