@@ -16,10 +16,7 @@
     (.impose store c)))
 
 (defn int-var
-  ([]
-     "Creates a new IntVar instance"     
-     (IntVar.))
-  
+  ([store name min max] (IntVar. store name min max))
   ([store name domains]
      "Creates a new IntVar instance associated with the specified store and name.
      'domains' is a seq of pairs ie [[1 5] [10 20]]"             
@@ -29,10 +26,30 @@
        var)))
 
 (defn boolean-var
-  ([]
-     "Creates a new BooleanVar instance."
-     (BooleanVar.))
   ([store name]
      "Creates a new BooleanVar instance with the specified store and name."
      (BooleanVar. store name)))
+
+
+(defmacro defvars
+  "Defines a var which is a map of keywords to IntVar instances.
+   form-name: the top level var to associate the map to
+   defaults: a map with keys: :store :min :max
+   var-names: collects up all the remaining items which are assumed to be
+              keywords which will act as the name for an IntVar and also
+              the key to lookup the IntVar in the def'd map.
+
+    e.g.:
+    (def jacop-store (store))
+
+    (defvars shoes
+      {:store jacop-store :min 1 :max 4}
+      :Heels :Flats :Boots :Pumps)
+  "
+  [form-name defaults & var-names]
+  (let [{:keys [store min max]} defaults]
+    `(let [store# ~store
+           vars# (map #(int-var store# (name %) ~min ~max) '~var-names)]
+       (def ~form-name (zipmap '~var-names vars#)))))
+
 

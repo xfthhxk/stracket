@@ -7,7 +7,7 @@
 (defn- first-eg
   []
   (let [store (s/store)
-        vars (vec (map #(s/int-var store (str "v" %) [[1 4]]) (range 1 5)))
+        vars (vec (map #(s/int-var store (str "v" %) 1 4) (range 1 5)))
         dfs (ss/depth-first-search)
         select (ss/input-order-select store vars (ss/min-domain))
         constraint-pairs [[0 1] [0 2] [1 2] [1 3] [2 3]]
@@ -26,6 +26,7 @@
       (is (= [1 2 3 1] vals)))))
 
 
+
       
 (defn- arch-friends
   []
@@ -39,7 +40,7 @@
         heels-in-a-handcart 1
         the-shoe-place 2
         tootsies 3
-        make-int-var (fn[name] (s/int-var store name [[1 4]]))
+        make-int-var (fn[name] (s/int-var store name 1 4))
         shoes (vec (map make-int-var shoe-names))
         shops (vec (map make-int-var shop-names))
         all-vars (concat shoes shops)]
@@ -69,4 +70,12 @@
                    "Tootsies" 3}]
       (is (= ref-map ans-map)))))
 
+(deftest defvars-test
+  (testing "defvars"
     
+    (def jacop-store (s/store))
+    (s/defvars shoes
+      {:store jacop-store :min 1 :max 4}
+      :Heels :Flats :Boots :Pumps)
+    
+  (is (map? shoes))))
