@@ -1,5 +1,5 @@
 (ns stracket.core-test
-  (:use clojure.test)
+  (:use midje.sweet)
   (require [stracket.core :as s]
            [stracket.search :as ss]
            [stracket.constraint :as sc]))
@@ -19,11 +19,12 @@
       nil)))
 
 
-(deftest a-test
-  (testing "First example from jacop."
-    (let [vars (first-eg)
-          vals (map #(.value %) vars)]
-      (is (= [1 2 3 1] vals)))))
+(fact "First example from jacop."
+  (let [vars (first-eg)
+        vals (map #(.value %) vars)]
+    
+    vals => [1 2 3 1]))
+
 
 
 
@@ -56,26 +57,33 @@
     all-vars))
 
         
-(deftest arch-friends-test
-  (testing "ArchFriends test"
-    (let [vars (arch-friends)
-          ans-map (reduce #(assoc %1 (.id %2) (.value %2)) {} vars)
-          ref-map {"EcruEspadrilles" 2
-                   "FuchsiaFlats" 4
-                   "PurplePumps" 1
-                   "SuedeSandals" 3
-                   "FootFarm" 2
-                   "HeelsInAHandcart" 4
-                   "TheShoePlace" 1
-                   "Tootsies" 3}]
-      (is (= ref-map ans-map)))))
+(fact "ArchFriends test"
+   (let [vars (arch-friends)
+         ans-map (reduce #(assoc %1 (.id %2) (.value %2)) {} vars)]
+     
+     ans-map => {"EcruEspadrilles" 2
+                 "FuchsiaFlats" 4
+                 "PurplePumps" 1
+                 "SuedeSandals" 3
+                 "FootFarm" 2
+                 "HeelsInAHandcart" 4
+                 "TheShoePlace" 1
+                 "Tootsies" 3}))
+     
 
-(deftest defvars-test
-  (testing "defvars"
-    
-    (def jacop-store (s/store))
-    (s/defvars shoes
-      {:store jacop-store :min 1 :max 4}
-      :Heels :Flats :Boots :Pumps)
-    
-  (is (map? shoes))))
+
+
+
+(fact "defvars test"
+  (def jacop-store (s/store)) 
+  (s/defvars shoes
+    {:store jacop-store :min 1 :max 4}
+    :Heels :Flats :Boots :Pumps)
+
+  jacop-store => s/store?
+  shoes => map?
+  (:Heels shoes) => s/int-var?
+  (.min (:Heels shoes)) => 1
+  (.max (:Heels shoes)) => 4  )
+
+

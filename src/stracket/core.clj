@@ -4,6 +4,21 @@
             Store IntVar])
   (:require [stracket.constraint :as sc]))
 
+(defn store?
+  "Answers if the argument is an instance of Store"
+  [x]
+  (instance? Store x))
+
+(defn int-var?
+  "Answers if the argument is an instance of IntVar"
+  [x]
+  (instance? IntVar x))
+
+(defn boolean-var?
+  "Answers if the argument is an instance of BooleanVar"
+  [x]
+  (instance? BooleanVar x))
+
 (defn store
   "makes a new Store instance"
   []
