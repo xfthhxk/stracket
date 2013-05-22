@@ -55,17 +55,16 @@
                      (assoc m (tr-fn (.id v)) (.value v)))
         vars (take-while (complement nil?) (.vars store))] ; array may have 4 entries but length might be > 4 for example
     (reduce reducer-fn {} vars)))
-    
 
 
-(defmacro fd-vars
+
+(defn fd-vars
   "Creates a map of keywords to IntVar instances.
    defaults: a map with keys: :store :min :max
    var-names: collects up all the remaining items which are assumed to be
               keywords which will act as the name for an IntVar and also
-              the key to lookup the IntVar in the def'd map.
+              the key to lookup the IntVar in the returned map.
 
-    e.g.:
     (def jacop-store (store))
 
     (fd-vars shoes
@@ -78,33 +77,21 @@
      :Boots (IntVar. store \"Boots\" 1 4)
      :Pumps (IntVar. store \"Pumps\" 1 4)}"
   [defaults & var-names]
-  (let [{:keys [store min max]} defaults]
-    `(let [store# ~store
-           vars# (map #(int-var store# (name %) ~min ~max) '~var-names)]
-       (zipmap '~var-names vars#))))
-  
+  (let [{:keys [store min max]} defaults
+        vars (map #(int-var store (name %) min max) var-names)]
+    (zipmap var-names vars)))
+
 
 (defmacro defvars
   "Defines a var which is a map of keywords to IntVar instances.
    form-name: the top level var to associate the map to
-   defaults: a map with keys: :store :min :max
-   var-names: collects up all the remaining items which are assumed to be
-              keywords which will act as the name for an IntVar and also
-              the key to lookup the IntVar in the def'd map.
-
+   Uses the fd-vars function for the crux of the work.
     e.g.:
     (def jacop-store (store))
 
     (defvars shoes
       {:store jacop-store :min 1 :max 4}
       :Heels :Flats :Boots :Pumps)
-
-    ;; Should output:
-    (def shoes
-      {:Heels (IntVar. store \"Heels\" 1 4)
-       :Flats (IntVar. store \"Flats\" 1 4)
-       :Boots (IntVar. store \"Boots\" 1 4)
-       :Pumps (IntVar. store \"Pumps\" 1 4)})
   "
   [form-name defaults & var-names]
   `(def ~form-name (fd-vars ~defaults ~@var-names)))
