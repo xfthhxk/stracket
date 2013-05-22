@@ -8,7 +8,7 @@
   (let [store (s/store)
         vars (s/fd-vars {:store store :min 1 :max 4} :V1 :V2 :V3 :V4)
         constraints (map (fn [[x y]](sc/neq (x vars) (y vars)))
-                         [[:V1 :V2] [:V1 :V3] [:V2 :V3] [:V2 :V3] [:V3 :V4]])
+                         [[:V1 :V2] [:V1 :V3] [:V2 :V3] [:V3 :V4]])
         dfs (ss/depth-first-search)
         select (ss/input-order-select store (vals vars) (ss/min-domain))]
     (s/impose! store constraints)
