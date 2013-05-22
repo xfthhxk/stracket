@@ -30,16 +30,17 @@
   
 (defn search-all-at-once
   "Returns the solution listener"
-  [store all-vars]
-  (let [select (SimpleSelect. (into-array all-vars) (MostConstrainedStatic.) (IndomainMin.))
-        search (depth-first-search)
-        solution-listener (.getSolutionListener search)]
-    (doto solution-listener
-      (.searchAll true)
-      (.recordSolutions true))
-    (.setAssignSolution search true)
-    (labeling search store select)
-    solution-listener))
+  ([store] (search-all-at-once store (take-while (complement nil?) (.vars store))))
+  ([store all-vars]
+     (let [select (SimpleSelect. (into-array all-vars) (MostConstrainedStatic.) (IndomainMin.))
+           search (depth-first-search)
+           solution-listener (.getSolutionListener search)]
+       (doto solution-listener
+         (.searchAll true)
+         (.recordSolutions true))
+       (.setAssignSolution search true)
+       (labeling search store select)
+       solution-listener)))
       
     
         

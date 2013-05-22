@@ -46,6 +46,18 @@
      (BooleanVar. store name)))
 
 
+(defn extract-var-info
+  "Returns a map of all var ids and values associated with the store.
+   Accepts keyword :as-string to return the ids as strings, otherwise ids are keywords"
+  [store & more]
+  (let [tr-fn (if (some (partial = :as-string) more) identity keyword)
+        reducer-fn (fn[m v]
+                     (assoc m (tr-fn (.id v)) (.value v)))
+        vars (take-while (complement nil?) (.vars store))] ; array may have 4 entries but length might be > 4 for example
+    (reduce reducer-fn {} vars)))
+    
+
+
 (defmacro defvars
   "Defines a var which is a map of keywords to IntVar instances.
    form-name: the top level var to associate the map to
@@ -60,6 +72,13 @@
     (defvars shoes
       {:store jacop-store :min 1 :max 4}
       :Heels :Flats :Boots :Pumps)
+
+    ;; Should output:
+    (def shoes
+      {:Heels (IntVar. store \"Heels\" 1 4)
+       :Flats (IntVar. store \"Flats\" 1 4)
+       :Boots (IntVar. store \"Boots\" 1 4)
+       :Pumps (IntVar. store \"Pumps\" 1 4)})
   "
   [form-name defaults & var-names]
   (let [{:keys [store min max]} defaults]
@@ -68,3 +87,12 @@
        (def ~form-name (zipmap '~var-names vars#)))))
 
 
+
+(defmacro defconstraints
+  "Defines a var which is a vector of constraints"
+  [form-name & constraints]
+  (let [c (vec constraints)]
+    `(def ~form-name ~c)))
+
+
+  
