@@ -4,26 +4,16 @@
            [stracket.search :as ss]
            [stracket.constraint :as sc]))
   
-(defn- first-eg
-  []
+(fact "JaCoP map coloring example"
   (let [store (s/store)
-        vars (vec (map #(s/int-var store (str "v" %) 1 4) (range 1 5)))
+        vars (s/fd-vars {:store store :min 1 :max 4} :V1 :V2 :V3 :V4)
+        constraints (map (fn [[x y]](sc/neq (x vars) (y vars)))
+                         [[:V1 :V2] [:V1 :V3] [:V2 :V3] [:V2 :V3] [:V3 :V4]])
         dfs (ss/depth-first-search)
-        select (ss/input-order-select store vars (ss/min-domain))
-        constraint-pairs [[0 1] [0 2] [1 2] [1 3] [2 3]]
-        constraints (map (fn[[x y]]
-                           (sc/neq (vars x) (vars y))) constraint-pairs)]
+        select (ss/input-order-select store (vals vars) (ss/min-domain))]
     (s/impose! store constraints)
-    (if (ss/labeling dfs store select)
-      vars
-      nil)))
-
-
-(fact "First example from jacop."
-  (let [vars (first-eg)
-        vals (map #(.value %) vars)]
-    
-    vals => [1 2 3 1]))
+    (ss/labeling dfs store select) => true
+    (s/extract-var-info store) => {:V4 1, :V3 2, :V2 1, :V1 3}))
 
 
 (fact "defvars test"
@@ -72,3 +62,13 @@
                                        :HeelsInAHandcart 4
                                        :TheShoePlace 1
                                        :Tootsies 3})
+
+(fact "test fd-vars macro"
+  (let [j-store (s/store)
+        shoes-map (s/fd-vars {:store jacop-store :min 1 :max 4}
+                             :EcruEspadrilles :FuchsiaFlats :PurplePumps :SuedeSandals)]
+    shoes-map => map?
+    (:SuedeSandals shoes-map) => s/int-var?
+    (-> shoes-map :SuedeSandals .min) => 1
+    (-> shoes-map :SuedeSandals .max) => 4))
+
