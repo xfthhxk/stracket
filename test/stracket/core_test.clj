@@ -4,7 +4,7 @@
            [stracket.search :as ss]
            [stracket.constraint :as sc]))
 
-(fact "test fd-vars macro"
+(fact "test fd-vars fn"
   (let [j-store (s/store)
         shoes-map (s/fd-vars {:store j-store :min 1 :max 4}
                              :EcruEspadrilles :FuchsiaFlats :PurplePumps :SuedeSandals)]
