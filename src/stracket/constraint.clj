@@ -1,9 +1,11 @@
 (ns stracket.constraint
+  (:refer-clojure :rename {not= core-not=})
   (:import [JaCoP.constraints
             AbsXeqY Alldiff Alldifferent Alldistinct Among AmongVar And AndBool
             Circuit
             Not
-            XeqC XeqY XneqC XneqY XplusCeqZ]))
+            Sum SumWeight
+            XeqC XeqY XmulCeqZ XneqC XneqY XplusCeqZ XplusYeqZ]))
 
 (defn abs-eq
   "Creates and returns an AbsXeqY instance.
@@ -47,6 +49,8 @@
   (And. (into-array constraints)))
 
 (defn and-bool
+  "If all vars are equal to 1 then result is 1 also. Otherwise, result is 0.
+   Restricts domain of all vars as well as result to between 0 and 1."
   [vars result]
   (AndBool. (into-array vars) result))
 
@@ -76,6 +80,29 @@
   [x c z]
   (XplusCeqZ. x c z))
 
-(defn notc
+(defn x+y=z
+  "x + y = z, all IntVars"
+  [x y z]
+  (XplusYeqZ. x y z))
+
+(defn x*c=z
+  "x and z are IntVar and c is an int"
+  [x c z]
+  (XmulCeqZ. x c z))
+
+(defn not=
+  "invert the relationship"
   [var]
   (Not. var))
+
+(defn sum=
+  "Sums all vars to equal sum.
+   vars is a seq of IntVar. sum is an IntVar."
+  [vars sum]
+  (Sum. (into-array vars) sum))
+
+(defn sum-weight=
+  "Weighted sum of all vars equals sum"
+  [vars weights sum]
+  (SumWeight. (into-array vars) (into-array Integer/TYPE (map int weights)) sum))
+

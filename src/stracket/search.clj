@@ -1,10 +1,10 @@
 (ns stracket.search
+  (require [stracket.core :as s])
   (:import [JaCoP.search
+            DepthFirstSearch
+            IndomainMin InputOrderSelect 
             MostConstrainedStatic
-            Search DepthFirstSearch
-            SelectChoicePoint InputOrderSelect
-            IndomainMin
-            SimpleSelect]))
+            Search SelectChoicePoint SimpleSelect]))
 
 (defn min-domain
   "Creates an instance of IndomainMin"
@@ -16,10 +16,15 @@
   []
   (DepthFirstSearch.))
 
+(defn most-constrained-static
+  []
+  (MostConstrainedStatic.))
+
 (defn input-order-select
   "Input order selector of variables."
-  [store vars domain]
-  (InputOrderSelect. store (into-array vars) domain))
+  ([store domain] (input-order-select store (s/extract-vars store) domain))
+  ([store vars domain]
+     (InputOrderSelect. store (into-array vars) domain)))
 
 (defn labeling
   "Perform a search labeling store and the selection strategy.
@@ -44,4 +49,13 @@
       
     
         
-        
+(defn search
+  "Search method based on input order and lexigraphical ordering of values."
+  [store]
+  (labeling (depth-first-search) store (input-order-select store (min-domain))))
+
+(defn search-most-constrained-static
+  [store]
+  (let [vars (into-array (s/extract-vars store))
+        select (SimpleSelect. vars (most-constrained-static) (min-domain))]
+  (labeling (depth-first-search) store select)))

@@ -26,9 +26,13 @@
 
 (defn impose!
   "Imposes constraints on to the store. The store is mutated."
-  [store constraints]
-  (doseq [c constraints]  ; doseq to realize potentially lazy constraints
-    (.impose store c)))
+  ([store constraints]
+     (doseq [c constraints]  ; doseq to realize potentially lazy constraints
+       (.impose store c)))
+  ([store constraints queue-idx]
+     (doseq [c constraints]
+       (.impose store c queue-idx))))
+  
 
 (defn int-var
   ([store name min max] (IntVar. store name min max))
@@ -43,8 +47,17 @@
 (defn boolean-var
   ([store name]
      "Creates a new BooleanVar instance with the specified store and name."
-     (BooleanVar. store name)))
+     (BooleanVar. store name))
+  ([store name min max]
+     "Creates a new BooleanVar instance with the specified store, name, min and max values.
+      Note that min must be >= 0 and max must be <= 1"
+     (BooleanVar. store name min max)))
+     
 
+(defn extract-vars
+  "Returns a seq of vars associated with the store"
+  [store]
+  (take-while (complement nil?) (.vars store)))  ;; array may have 4 entries but length might be > 4 for example
 
 (defn extract-var-info
   "Returns a map of all var ids and values associated with the store.
@@ -52,9 +65,9 @@
   [store & more]
   (let [tr-fn (if (some (partial = :as-string) more) identity keyword)
         reducer-fn (fn[m v]
-                     (assoc m (tr-fn (.id v)) (.value v)))
-        vars (take-while (complement nil?) (.vars store))] ; array may have 4 entries but length might be > 4 for example
-    (reduce reducer-fn {} vars)))
+                     (assoc m (tr-fn (.id v)) (.value v)))]
+
+    (reduce reducer-fn {} (extract-vars store))))
 
 
 
@@ -64,6 +77,7 @@
    var-names: collects up all the remaining items which are assumed to be
               keywords which will act as the name for an IntVar and also
               the key to lookup the IntVar in the returned map.
+              The var-names can be a seq as well.
 
     (def jacop-store (store))
 
@@ -77,9 +91,14 @@
      :Boots (IntVar. store \"Boots\" 1 4)
      :Pumps (IntVar. store \"Pumps\" 1 4)}"
   [defaults & var-names]
-  (let [{:keys [store min max]} defaults
-        vars (map #(int-var store (name %) min max) var-names)]
-    (zipmap var-names vars)))
+  (let [{:keys [store min max type] :or {type :int}} defaults
+        ctor (case type
+               :int int-var
+               :boolean boolean-var
+               (throw (IllegalArgumentException. (str "Unknown type " type))))
+        var-names-flattened (flatten var-names)
+        vars (map #(ctor store (name %) min max) var-names-flattened)]
+    (zipmap var-names-flattened vars)))
 
 
 (defmacro defvars
